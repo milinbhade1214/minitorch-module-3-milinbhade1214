@@ -119,6 +119,14 @@ class Sigmoid(Function):
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         (t1,) = ctx.saved_values
         return grad_output.f.sigmoid_back_zip(t1, grad_output)
+    
+    """
+    @staticmethod
+    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
+        (saved_val, ) = ctx.saved_values
+        return grad_output * saved_val * (-saved_val + 1)
+    
+    """
 
 
 class ReLU(Function):

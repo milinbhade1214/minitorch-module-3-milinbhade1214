@@ -5,6 +5,8 @@ Collection of the core mathematical operators used throughout the code base.
 import math
 from typing import Callable, Iterable
 
+
+import numpy as np
 # ## Task 0.1
 #
 # Implementation of a prelude of elementary functions.
@@ -49,7 +51,7 @@ def neg(x: float) -> float:
     Returns:
         float: The negation of x.
     """
-    return -float(x)
+    return float(-x)
 
 
 def lt(x: float, y: float) -> float:
@@ -118,6 +120,7 @@ def sigmoid(x: float) -> float:
     """
     return 1.0 / (1.0 + math.exp(-x)) if x >= 0 else math.exp(x) / (1.0 + math.exp(x))
 
+
 def exp(x: float) -> float:
     """Exponential function.
 
@@ -127,7 +130,8 @@ def exp(x: float) -> float:
     Returns:
         float: The exponential of x.
     """
-    return math.exp(x)
+    x += 0.0
+    return np.exp(x)
 
 
 def relu(x: float) -> float:
@@ -140,6 +144,8 @@ def relu(x: float) -> float:
         float: x if x is greater than 0, else 0.
     """
     return float(x) if x > 0 else 0.0
+
+
 def log(x: float) -> float:
     """Logarithm of x
     Args:
@@ -147,7 +153,7 @@ def log(x: float) -> float:
     Returns:
         float: log(x)
     """
-    return math.log(x)
+    return math.log(x + EPS)
 
 
 def log_back(x: float, d: float) -> float:
@@ -185,7 +191,7 @@ def inv_back(x: float, d: float) -> float:
     Returns:
         float: The gradient of the inverse function.
     """
-    return -d / (x**2)
+    return -(1.0 / x**2) * d
 
 
 def relu_back(x: float, d: float) -> float:
@@ -197,17 +203,15 @@ def relu_back(x: float, d: float) -> float:
     Returns:
         float: The gradient of the ReLU function.
     """
-    return d if x > 0 else 0
+    return d if x > 0 else 0.0
 
 def sigmoid_back(x: float, d: float) -> float:
     """
     Backward pass for Sigmoid
     """
-    return sigmoid(x) * (1 - sigmoid(x)) * d
+    return  d * np.exp(-x) / ((1 + np.exp(-x)) ** 2)
 
-def relu_back(x: float, d:float) -> float:
-    r"If :math:`f = relu` compute d :math:`d \times f'(x)`"
-    return d if x > 0 else 0.0
+
 
 # ## Task 0.3
 
@@ -268,26 +272,28 @@ def addLists(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
     """
     return zipWith(add)(ls1, ls2)
 
-
 def reduce(
     fn: Callable[[float, float], float], start: float
 ) -> Callable[[Iterable[float]], float]:
-    """
-    Higher order function to reduce a list.
+    r"""
+    Higher-order reduce.
+
     Args:
-        fn: A function that takes two floats and returns a float.
-        start: The initial value.
+        fn: combine two values
+        start: start value $x_0$
+
     Returns:
-        A function that takes an iterable of floats and returns a float.
+        Function that takes a list `ls` of elements
+         $x_1 \ldots x_n$ and computes the reduction :math:`fn(x_3, fn(x_2,fn(x_1, x_0)))`
     """
 
-    def apply(ls: Iterable[float]) -> float:
-        acc = start
-        for x in ls:
-            acc = fn(acc, x)
-        return acc
+    def _reduce(ls:Iterable[float]) -> float: 
+      val = start 
+      for l in ls: 
+        val = fn(val, l)
+      return val 
 
-    return apply
+    return _reduce 
 
 
 def sum(ls: Iterable[float]) -> float:
@@ -298,15 +304,9 @@ def sum(ls: Iterable[float]) -> float:
     Returns:
         The sum of the list.
     """
-    return reduce(add, 0)(ls)
+    return reduce(add, 0.0)(ls)
 
+def prod(ls: Iterable[float])-> float:
+    "Product of a list using :func:`reduce` and :func:`mul`."
+    return reduce(mul, 1.0)(ls)
 
-def prod(ls: Iterable[float]) -> float:
-    """
-    Product of a list of numbers.
-    Args:
-        ls: A list of numbers.
-    Returns:
-        product of the list.
-    """
-    return reduce(mul, 1)(ls)

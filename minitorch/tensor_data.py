@@ -43,6 +43,7 @@ def index_to_position(index: Index, strides: Strides) -> int:
     Returns:
         Position in storage
     """
+    # print(index, strides)
     assert len(index) == len(strides)
     return sum([i * s for i, s in zip(index, strides)])
 
@@ -59,13 +60,10 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
         out_index : return index corresponding to position.
 
     """
-    for i, s in enumerate(shape):
-        product = prod(shape[i:])
-        divisor = product / s
-        index = int(ordinal // divisor)
-
-        ordinal -= index * divisor
-        out_index[i] = index
+    ordinal += 0  # fix "unsupported error"
+    for i in range(len(shape) - 1, -1, -1):
+        out_index[i] = ordinal % shape[i]
+        ordinal = ordinal // shape[i]
     
 
 
